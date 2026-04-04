@@ -6,7 +6,7 @@ import path from "path";
 
 export async function POST(request: Request) {
   // 1. Get masterPassword from request body
-  const { masterPassword } = await request.json();
+  const { masterPassword, fileContents } = await request.json();
 
   const filePath = path.join(process.cwd(), "data", "vault.enc");
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       { status: 404 },
     );
   }
-  const cipherTxt = fs.readFileSync(filePath, "utf-8");
+  const cipherTxt = fileContents ?? fs.readFileSync(filePath, "utf-8");
 
   // 4. Call decryptVault() from your crypto.ts and return decrypted data or 401 if wrong password
   var decryptedData;
