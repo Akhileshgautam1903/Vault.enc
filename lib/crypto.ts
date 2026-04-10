@@ -1,3 +1,4 @@
+import { Vault } from "@/model/entry";
 import crypto from "crypto";
 
 // Constants — these sizes are AES-256-GCM requirements
@@ -26,7 +27,7 @@ cipher.update() + cipher.final() → encrypted bytes → hex string
 cipher.getAuthTag() → integrity proof
 all bundled → JSON string → written to disk
 */
-export const encryptVault = (data: object, masterPassword: string): string => {
+export const encryptVault = (data: Vault, masterPassword: string): string => {
   // 1. Random salt — unique per vault, generated ONCE at creation
   const salt = crypto.randomBytes(SALT_SIZE);
 
