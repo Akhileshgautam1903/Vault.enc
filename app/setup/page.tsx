@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useVault } from "@/lib/vaultContext";
 
 export default function page() {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  const router = useRouter()
+  const { setMasterPassword } = useVault();
+
+  const router = useRouter();
 
   //Check if the password and confirm password matches
   const handleClick = () => {
@@ -27,7 +30,10 @@ export default function page() {
       body: JSON.stringify({ masterPassword: password, entries: [] }),
     });
 
-    if (res.ok) router.push("/vault");
+    if (res.ok) {
+      setMasterPassword(password);
+      router.push("/vault");
+    } else setError("Something went wrong. Please try again.");
   };
 
   return (
