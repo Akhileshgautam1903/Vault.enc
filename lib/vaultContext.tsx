@@ -1,15 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState } from "react"
-
-// Shape of one entry
-type Entry = {
-  id: string
-  site: string
-  username: string
-  password: string
-  notes?: string
-}
+import { Entry } from "@/model/entry"
 
 // Shape of everything the context holds
 type VaultContextType = {

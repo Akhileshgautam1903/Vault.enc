@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const { masterPassword, entries } = await request.json();
 
   // Encrypt the data
-  const encryptedData = encryptVault(entries, masterPassword);
+  const encryptedData = encryptVault({ entries }, masterPassword);
 
   // Write to the file and return appropriate message
   const filePath = path.join(process.cwd(), "data", "vault.enc");

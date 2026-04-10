@@ -3,6 +3,7 @@ import { decryptVault } from "@/lib/crypto";
 
 import fs from "fs";
 import path from "path";
+import { Vault } from "@/model/entry";
 
 export async function POST(request: Request) {
   // 1. Get masterPassword from request body
@@ -25,8 +26,8 @@ export async function POST(request: Request) {
   // 4. Call decryptVault() from your crypto.ts and return decrypted data or 401 if wrong password
   var decryptedData;
   try {
-    const decryptedData = decryptVault(cipherTxt, masterPassword);
-    return NextResponse.json({ data: decryptedData });
+    const decryptedData = decryptVault(cipherTxt, masterPassword) as Vault;
+    return NextResponse.json({ data: decryptedData.entries });
   } catch (error) {
     return NextResponse.json(
       { error: "Incorrect master password" },
