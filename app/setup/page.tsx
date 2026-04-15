@@ -37,28 +37,47 @@ export default function page() {
   };
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black gap-4">
-      <input
-        className="border-zinc-600 border-2 outline-0 rounded-md py-1.5 px-2.5"
-        type="password"
-        placeholder="Enter Master password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <input
-        className="border-zinc-600 border-2 outline-0 rounded-md py-1.5 px-2.5"
-        type="password"
-        placeholder="Confirm Master password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-      />
-      <button
-        className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/8 px-5 transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-39.5"
-        onClick={() => handleClick()}
-      >
-        Submit
-      </button>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+    <div className="flex items-center justify-center min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans px-4">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border dark:border-zinc-800 space-y-5">
+        <h1 className="text-2xl font-semibold text-center tracking-tight">
+          Set Master Password
+        </h1>
+
+        {/* PASSWORD */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-zinc-500">Master Password</label>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-3 py-2 border rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 text-sm"
+          />
+        </div>
+
+        {/* CONFIRM PASSWORD */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-zinc-500">Confirm Password</label>
+          <input
+            type="password"
+            placeholder="Re-enter password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full px-3 py-2 border rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 text-sm"
+          />
+        </div>
+
+        {/* BUTTON */}
+        <button
+          onClick={() => handleClick()}
+          className="w-full py-2 text-sm font-medium bg-black text-white rounded-md hover:bg-zinc-800 transition dark:bg-white dark:text-black"
+        >
+          Continue
+        </button>
+
+        {/* ERROR */}
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      </div>
     </div>
   );
 }

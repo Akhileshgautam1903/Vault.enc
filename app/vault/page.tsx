@@ -91,140 +91,218 @@ const Vault = () => {
 
     //4. Go home
     router.push("/");
-    
   };
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black gap-4">
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50">
-          <div>
-            <h2>Add Entry</h2>
-            <input
-              placeholder="Site"
-              value={newEntry.site}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, site: e.target.value })
-              }
-            />
-            <input
-              placeholder="Username"
-              value={newEntry.username}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, username: e.target.value })
-              }
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={newEntry.password}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, password: e.target.value })
-              }
-            />
-            <textarea
-              placeholder="Notes (optional)"
-              value={newEntry.notes}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, notes: e.target.value })
-              }
-            />
-            <button onClick={handleAddEntry}>Save</button>
-            <button onClick={() => setShowAddModal(false)}>Cancel</button>
-          </div>
-        </div>
-      )}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black/50">
-          <div>
-            <h2>Edit Entry</h2>
-            <input
-              placeholder="Site"
-              value={editEntry?.site ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, site: e.target.value })
-              }
-            />
-            <input
-              placeholder="Username"
-              value={editEntry?.username ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, username: e.target.value })
-              }
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={editEntry?.password ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, password: e.target.value })
-              }
-            />
-            <textarea
-              placeholder="Notes (optional)"
-              value={editEntry?.notes ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, notes: e.target.value })
-              }
-            />
-            <button onClick={handleEditEntry}>Save</button>
-            <button onClick={() => setShowEditModal(false)}>Cancel</button>
-          </div>
-        </div>
-      )}
-      {showLockModal && (
-        <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)" }}
+    <div className="flex flex-col min-h-screen items-center bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans">
+      {/* HEADER */}
+      <div className="flex justify-between items-center w-full max-w-4xl px-4 py-6">
+        <h1 className="text-3xl font-semibold tracking-tight">Vault.enc</h1>
+        <button
+          className="px-4 py-1.5 text-sm border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          onClick={() => setShowLockModal(true)}
         >
-          <div>
-            <h2>Export your vault</h2>
-            <p>
-              Your session is ending. Export your vault file to keep your data
-              safe.
-            </p>
-            <input
-              placeholder="filename"
-              value={filename}
-              onChange={(e) => setFilename(e.target.value)}
-            />
-            <button onClick={handleExportAndLock}>Export & Lock</button>
-            <button onClick={() => setShowLockModal(false)}>
-              Back to editing
-            </button>
-          </div>
-        </div>
-      )}
-      <div>
-        <h1>Vault.enc</h1>
-        <button onClick={() => setShowLockModal(true)}>Lock</button>
+          Lock
+        </button>
       </div>
+
+      {/* SEARCH */}
       <input
         type="text"
-        placeholder="Enter the site name"
+        placeholder="Search site..."
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
+        className="w-full max-w-4xl px-4 py-2 mb-4 border rounded-md bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300"
       />
-      <div>
-        <button onClick={() => setShowAddModal(true)}>Add entry</button>
+
+      {/* ADD BUTTON */}
+      <div className="w-full max-w-4xl flex justify-end mb-4 px-2">
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="px-4 py-2 text-sm bg-black text-white rounded-md hover:bg-zinc-800 dark:bg-white dark:text-black"
+        >
+          Add Entry
+        </button>
+      </div>
+
+      {/* ENTRY LIST */}
+      <div className="w-full max-w-4xl space-y-3 px-2">
         {filteredEnteries.map((entry) => (
-          <div key={entry.id}>
-            <p>{entry.site}</p>
-            <p>{entry.username}</p>
-            <button onClick={() => navigator.clipboard.writeText(entry.password)}>Copy password</button>
-            <button onClick={() => handleDeleteEntry(entry.id)}>Delete</button>
-            <button
-              onClick={() => {
-                setEditEntry(entry);
-                setShowEditModal(true);
-              }}
-            >
-              Update
-            </button>
+          <div
+            key={entry.id}
+            className="flex justify-between items-center p-4 border rounded-lg bg-white dark:bg-zinc-900 shadow-sm"
+          >
+            <div>
+              <p className="font-medium">{entry.site}</p>
+              <p className="text-sm text-zinc-500">{entry.username}</p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                className="text-sm px-3 py-1 border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                onClick={() => navigator.clipboard.writeText(entry.password)}
+              >
+                Copy
+              </button>
+              <button
+                className="text-sm px-3 py-1 border rounded-md hover:bg-red-100 dark:hover:bg-red-900 text-red-500"
+                onClick={() => handleDeleteEntry(entry.id)}
+              >
+                Delete
+              </button>
+              <button
+                className="text-sm px-3 py-1 border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                onClick={() => {
+                  setEditEntry(entry);
+                  setShowEditModal(true);
+                }}
+              >
+                Edit
+              </button>
+            </div>
           </div>
         ))}
       </div>
-      {saving && <p>Saving...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+
+      {/* STATUS */}
+      {saving && <p className="mt-4 text-sm text-zinc-500">Saving...</p>}
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+
+      {/* MODALS */}
+      {(showAddModal || showEditModal || showLockModal) && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          {/* ADD MODAL */}
+          {showAddModal && (
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg w-full max-w-md shadow-lg space-y-4">
+              <h2 className="text-lg font-semibold">Add Entry</h2>
+
+              <input
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                placeholder="Site"
+                value={newEntry.site}
+                onChange={(e) =>
+                  setNewEntry({ ...newEntry, site: e.target.value })
+                }
+              />
+              <input
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                placeholder="Username"
+                value={newEntry.username}
+                onChange={(e) =>
+                  setNewEntry({ ...newEntry, username: e.target.value })
+                }
+              />
+              <input
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                type="password"
+                placeholder="Password"
+                value={newEntry.password}
+                onChange={(e) =>
+                  setNewEntry({ ...newEntry, password: e.target.value })
+                }
+              />
+              <textarea
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                placeholder="Notes (optional)"
+                value={newEntry.notes}
+                onChange={(e) =>
+                  setNewEntry({ ...newEntry, notes: e.target.value })
+                }
+              />
+
+              <div className="flex justify-end gap-2">
+                <button className="btn" onClick={handleAddEntry}>
+                  Save
+                </button>
+                <button
+                  className="btn-muted"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* EDIT MODAL */}
+          {showEditModal && (
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg w-full max-w-md shadow-lg space-y-4">
+              <h2 className="text-lg font-semibold">Edit Entry</h2>
+
+              <input
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                value={editEntry?.site ?? ""}
+                onChange={(e) =>
+                  setEditEntry({ ...editEntry!, site: e.target.value })
+                }
+              />
+              <input
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                value={editEntry?.username ?? ""}
+                onChange={(e) =>
+                  setEditEntry({ ...editEntry!, username: e.target.value })
+                }
+              />
+              <input
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                type="password"
+                value={editEntry?.password ?? ""}
+                onChange={(e) =>
+                  setEditEntry({ ...editEntry!, password: e.target.value })
+                }
+              />
+              <textarea
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                value={editEntry?.notes ?? ""}
+                onChange={(e) =>
+                  setEditEntry({ ...editEntry!, notes: e.target.value })
+                }
+              />
+
+              <div className="flex justify-end gap-2">
+                <button className="btn" onClick={handleEditEntry}>
+                  Save
+                </button>
+                <button
+                  className="btn-muted"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* LOCK MODAL */}
+          {showLockModal && (
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg w-full max-w-md shadow-lg space-y-4">
+              <h2 className="text-lg font-semibold">Export Vault</h2>
+              <p className="text-sm text-zinc-500">
+                Your session is ending. Export your vault file.
+              </p>
+
+              <input
+                className="input border-b-2 border-zinc-500 outline-none py-1"
+                placeholder="Filename"
+                value={filename}
+                onChange={(e) => setFilename(e.target.value)}
+              />
+
+              <div className="flex justify-end gap-2">
+                <button className="btn" onClick={handleExportAndLock}>
+                  Export & Lock
+                </button>
+                <button
+                  className="btn-muted"
+                  onClick={() => setShowLockModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
