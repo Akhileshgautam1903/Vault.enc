@@ -11,8 +11,9 @@ VAULT.enc is a secure, local-first password manager built for personal use. Insp
 | Layer | Technology |
 |---|---|
 | Frontend + API | Next.js (App Router) |
-| Encryption | Node.js `crypto` module |
-| Storage | Local file system (`vault.enc`) |
+| Server-side Encryption | Node.js `crypto` module (`lib/crypto.ts`) |
+| Client-side Encryption | Web Crypto API (`lib/clientCrypto.ts`) |
+| Storage | Browser memory (React Context) — no database |
 | State Management | React Context |
 | Language | TypeScript |
 
@@ -27,20 +28,15 @@ app/
 ├── unlock/page.tsx        # Unlock existing vault (upload + password)
 ├── vault/page.tsx         # Main vault UI (CRUD)
 └── api/
-    ├── exists/route.ts    # GET  — checks if vault.enc exists
-    ├── unlock/route.ts    # POST — decrypts vault, returns entries
-    ├── save/route.ts      # POST — encrypts entries, writes to disk
-    └── export/route.ts    # GET  — reads vault.enc for download
+    └── unlock/route.ts    # POST — decrypts uploaded file, returns entries
 
 lib/
-├── crypto.ts              # All encryption/decryption logic
+├── crypto.ts              # Server-side encryption/decryption (Node.js crypto)
+├── clientCrypto.ts        # Client-side encryption (Web Crypto API)
 └── vaultContext.tsx       # Global state (entries + masterPassword)
 
 models/
 └── entry.ts               # TypeScript types (Entry, Vault)
-
-data/
-└── vault.enc              # The encrypted file (source of truth)
 ```
 
 ---
@@ -51,8 +47,7 @@ data/
 ```
 / → "Start Fresh" → /setup
 Enter + confirm master password
-→ POST /api/save with empty entries
-→ vault.enc created on disk
+→ setMasterPassword() in context (no API call, no disk write)
 → /vault (empty, ready to add entries)
 ```
 
@@ -61,7 +56,7 @@ Enter + confirm master password
 / → "Upload .enc" → /unlock
 Select vault.enc file + enter master password
 → POST /api/unlock with file contents + password
-→ entries decrypted, loaded into context
+→ entries decrypted server-side, loaded into context
 → /vault (entries populated)
 ```
 
@@ -72,13 +67,14 @@ Edit   → prepopulated modal → saveToVault(entries.map(...))
 Delete → saveToVault(entries.filter(...))
 Search → filteredEntries = entries.filter(e => e.site.includes(query))
 ```
-Every change saves to disk immediately (optimistic update with rollback on failure).
+Every change updates context only — no disk writes, no API calls during CRUD.
 
 ### Export & Lock
 ```
 Lock button → export modal
 Enter filename → "Export & Lock"
-→ GET /api/export → download {filename}.enc
+→ encryptVault() via Web Crypto API (client-side, no server involved)
+→ download {filename}.enc directly from browser
 → clear context (entries + masterPassword)
 → router.push("/")
 ```
@@ -100,6 +96,58 @@ type Vault = {
   entries: Entry[]
 }
 ```
+
+---
+
+## Architecture (v2 — Multi-User Ready)
+
+### The Key Insight
+
+```
+vault.enc file = just a snapshot the user carries around
+Context (memory) = the actual source of truth while session is active
+```
+
+### Why This Makes It Multi-User
+
+```
+User A unlocks → their entries in context (Tab 1)
+User B unlocks → their entries in context (Tab 2)
+No shared file on disk → no conflict ✅
+```
+
+Each user brings their own `.enc` file and takes it away on export. The server never stores anything permanently.
+
+### Data Flow
+
+```
+UNLOCK (server-side decryption)
+Uploaded .enc file + master password
+        ↓
+POST /api/unlock → Node.js crypto → decrypted entries
+        ↓
+setEntries() + setMasterPassword() → stored in React Context
+
+CRUD (client-side, memory only)
+Add / Edit / Delete → updates Context only
+No API calls. No disk writes. Instant.
+
+EXPORT (client-side encryption)
+entries + masterPassword → Web Crypto API → encrypted string
+        ↓
+Blob download → {filename}.enc saved to user's machine
+        ↓
+Context cleared → session ends
+```
+
+### Session Safety
+
+```ts
+// Warns user before closing tab, refreshing, or navigating away
+window.addEventListener("beforeunload", (e) => e.preventDefault())
+```
+
+Browser shows its built-in "Leave site?" dialog — preventing accidental data loss.
 
 ---
 
@@ -211,6 +259,83 @@ original object ✅
 
 ---
 
+## Client-Side Encryption (Web Crypto API)
+
+Export encryption runs entirely in the browser — passwords never leave the client.
+
+### Why Web Crypto API?
+
+| | Node.js crypto | Web Crypto API |
+|---|---|---|
+| Runs in | Server (API routes) | Browser (client components) |
+| Used for | Decryption on unlock | Encryption on export |
+| Style | Synchronous | Async (Promise-based) |
+
+Both use the same algorithm — AES-256-GCM — so files encrypted in the browser can be decrypted on the server and vice versa.
+
+### Key Derivation (PBKDF2 — Web Crypto)
+
+```ts
+// Step 1 — import password as raw key material
+const keyMaterial = await crypto.subtle.importKey(
+  "raw",
+  new TextEncoder().encode(masterPassword),
+  "PBKDF2",
+  false,
+  ["deriveKey"]
+)
+
+// Step 2 — derive AES-256 key using PBKDF2
+const key = await crypto.subtle.deriveKey(
+  { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-512" },
+  keyMaterial,
+  { name: "AES-GCM", length: 256 },
+  false,
+  ["encrypt"]
+)
+```
+
+### Encryption (AES-256-GCM — Web Crypto)
+
+```ts
+const encrypted = await crypto.subtle.encrypt(
+  { name: "AES-GCM", iv },
+  key,
+  new TextEncoder().encode(JSON.stringify({ entries }))
+)
+
+// Web Crypto returns ciphertext + authTag combined
+// Last 16 bytes are always the authTag
+const ciphertext = encrypted.slice(0, encrypted.byteLength - 16)
+const authTag = encrypted.slice(encrypted.byteLength - 16)
+```
+
+### Hex Conversion
+
+Web Crypto returns `ArrayBuffer` — must convert to hex for JSON storage:
+
+```ts
+const toHex = (buffer: ArrayBuffer) =>
+  Array.from(new Uint8Array(buffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("")
+```
+
+### Output Bundle (same format as server-side)
+
+```json
+{
+  "salt": "a3f9...",
+  "iv": "9b2c...",
+  "authTag": "f302...",
+  "ciphertext": "da78..."
+}
+```
+
+The format is identical to server-side encryption — so `/api/unlock` can decrypt files regardless of which side encrypted them.
+
+---
+
 ## Security Properties
 
 | Property | How it's achieved |
@@ -218,9 +343,11 @@ original object ✅
 | Master password never stored | Only used transiently to derive the key |
 | Wrong password detected cleanly | AES-GCM authTag verification |
 | Tampered file detected | authTag mismatch on decrypt |
-| Same password → different ciphertext | Random salt + random IV per save |
+| Same password → different ciphertext | Random salt + random IV per export |
 | Brute force expensive | PBKDF2 with 100,000 iterations |
-| Data never leaves machine | All API routes run on localhost |
+| Passwords never sent over network | Export encryption runs in browser via Web Crypto API |
+| Multi-user safe | No shared server storage — each user owns their .enc file |
+| Accidental tab close protection | `beforeunload` event triggers browser warning dialog |
 
 ---
 
