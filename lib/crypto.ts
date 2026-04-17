@@ -27,6 +27,9 @@ cipher.update() + cipher.final() → encrypted bytes → hex string
 cipher.getAuthTag() → integrity proof
 all bundled → JSON string → written to disk
 */
+
+/* Not using due to architecture change
+
 export const encryptVault = (data: Vault, masterPassword: string): string => {
   // 1. Random salt — unique per vault, generated ONCE at creation
   const salt = crypto.randomBytes(SALT_SIZE);
@@ -58,6 +61,8 @@ export const encryptVault = (data: Vault, masterPassword: string): string => {
 
   return JSON.stringify(bundle);
 };
+
+*/
 
 //Takes the JSON string + the password and return the obejct
 export const decryptVault = (encryptedString: string, masterPassword: string): object => {

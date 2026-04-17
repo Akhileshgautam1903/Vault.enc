@@ -15,7 +15,7 @@ export default function page() {
 
   //Check if the password and confirm password matches
   const handleClick = () => {
-    if (isMatch()) saveWithEmpty();
+    if (isMatch()) initializeVault();
     else setError("Password do not match");
   };
 
@@ -23,17 +23,9 @@ export default function page() {
     password.length > 0 && password.trim() == confirmPassword.trim();
 
   //Api for saving the data and redirecting to /vault
-  const saveWithEmpty = async () => {
-    const res = await fetch("/api/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ masterPassword: password, entries: [] }),
-    });
-
-    if (res.ok) {
-      setMasterPassword(password);
-      router.push("/vault");
-    } else setError("Something went wrong. Please try again.");
+  const initializeVault = () => {
+    setMasterPassword(password);
+    router.push("/vault");
   };
 
   return (

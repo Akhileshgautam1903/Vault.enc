@@ -1,18 +1,17 @@
 "use client";
 
 import { useVault } from "@/lib/vaultContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { Entry } from "@/model/entry";
+import { encryptVault } from "@/lib/clientCrypto";
 
 const Vault = () => {
   const { entries, setEntries, masterPassword, setMasterPassword } = useVault();
   const router = useRouter();
 
   const [searchText, setSearchText] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [saving, setSaving] = useState<boolean>(false);
 
   const [showLockModal, setShowLockModal] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>("vault");
@@ -24,26 +23,28 @@ const Vault = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editEntry, setEditEntry] = useState<Entry | null>(null);
 
+  useEffect(() => {
+    //add listener when component mounts 
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    //when component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+
+  },[])
+
   const filteredEnteries = entries.filter((e) =>
     e.site.toLowerCase().includes(searchText.toLowerCase()),
   );
 
-  //Optimistic saving and rollbacking
+  //Updating the context on save
   const saveToVault = async (updatedEntries: Entry[]) => {
-    const previousEntries = entries; // ← snapshot before change
-
-    setEntries(updatedEntries); // optimistic UI update
-
-    const res = await fetch("/api/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ masterPassword, entries: updatedEntries }),
-    });
-
-    if (!res.ok) {
-      setEntries(previousEntries); // ← rollback if save fails
-      setError("Failed to save. Please try again.");
-    }
+    setEntries(updatedEntries); 
   };
 
   //Create new Entry
@@ -73,8 +74,7 @@ const Vault = () => {
   //Handle export and lock
   const handleExportAndLock = async () => {
     //1. Get encrypted contents from the disk
-    const res = await fetch("/api/export");
-    const { content } = await res.json();
+    const content = await encryptVault(entries, masterPassword);
 
     //2.Trigger Download
     const blob = new Blob([content], { type: "text/plain" });
@@ -163,10 +163,6 @@ const Vault = () => {
           </div>
         ))}
       </div>
-
-      {/* STATUS */}
-      {saving && <p className="mt-4 text-sm text-zinc-500">Saving...</p>}
-      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
       {/* MODALS */}
       {(showAddModal || showEditModal || showLockModal) && (
