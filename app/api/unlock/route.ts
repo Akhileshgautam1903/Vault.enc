@@ -9,8 +9,6 @@ export async function POST(request: Request) {
 
   // 3. Read the file content 
   const cipherTxt = fileContents;
-  
-  console.log(fileContents);
 
   // 4. Call decryptVault() from your crypto.ts and return decrypted data or 401 if wrong password
   try {
