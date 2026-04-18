@@ -11,32 +11,55 @@ const Vault = () => {
   const { entries, setEntries, masterPassword, setMasterPassword } = useVault();
   const router = useRouter();
 
+  const emptyEntry = { site: "", username: "", password: "", notes: "" };
+
   const [searchText, setSearchText] = useState<string>("");
+  const [filename, setFilename] = useState<string>("vault");
+  const [isLeaving, setIsLeaving] = useState<boolean>(false);
 
   const [showLockModal, setShowLockModal] = useState<boolean>(false);
-  const [filename, setFilename] = useState<string>("vault");
-
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const emptyEntry = { site: "", username: "", password: "", notes: "" };
-  const [newEntry, setNewEntry] = useState(emptyEntry);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [newEntry, setNewEntry] = useState(emptyEntry);
   const [editEntry, setEditEntry] = useState<Entry | null>(null);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    //add listener when component mounts 
+    // push a duplicate history entry
+    // so back button just goes to current page again
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+      setIsLeaving(true);
+      setShowLockModal(true); // show export modal instead
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    //check if we have master password is empty
+    if (!masterPassword) router.push("/");
+  }, [masterPassword, router]);
+
+  useEffect(() => {
+    //add listener when component mounts
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
-    }
+    };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     //when component unmount
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload)
-    }
-
-  },[])
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   const filteredEnteries = entries.filter((e) =>
     e.site.toLowerCase().includes(searchText.toLowerCase()),
@@ -44,7 +67,7 @@ const Vault = () => {
 
   //Updating the context on save
   const saveToVault = async (updatedEntries: Entry[]) => {
-    setEntries(updatedEntries); 
+    setEntries(updatedEntries);
   };
 
   //Create new Entry
@@ -100,7 +123,10 @@ const Vault = () => {
         <h1 className="text-3xl font-semibold tracking-tight">Vault.enc</h1>
         <button
           className="px-4 py-1.5 text-sm border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          onClick={() => setShowLockModal(true)}
+          onClick={() => {
+            setShowLockModal(true);
+            setIsLeaving(false);
+          }}
         >
           Lock
         </button>
@@ -146,7 +172,10 @@ const Vault = () => {
               </button>
               <button
                 className="text-sm px-3 py-1 border rounded-md hover:bg-red-100 dark:hover:bg-red-900 text-red-500"
-                onClick={() => handleDeleteEntry(entry.id)}
+                onClick={() => {
+                  setEntryToDelete(entry.id);
+                  setShowDeleteModal(true);
+                }}
               >
                 Delete
               </button>
@@ -165,7 +194,7 @@ const Vault = () => {
       </div>
 
       {/* MODALS */}
-      {(showAddModal || showEditModal || showLockModal) && (
+      {(showAddModal || showEditModal || showLockModal || showDeleteModal) && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           {/* ADD MODAL */}
           {showAddModal && (
@@ -274,7 +303,8 @@ const Vault = () => {
             <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg w-full max-w-md shadow-lg space-y-4">
               <h2 className="text-lg font-semibold">Export Vault</h2>
               <p className="text-sm text-zinc-500">
-                Your session is ending. Export your vault file.
+                {isLeaving && "Your are leaving."} Please Export your
+                vault file.
               </p>
 
               <input
@@ -290,7 +320,41 @@ const Vault = () => {
                 </button>
                 <button
                   className="btn-muted"
-                  onClick={() => setShowLockModal(false)}
+                  onClick={() => {setShowLockModal(false); setIsLeaving(false)}}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* DELETE MODAL */}
+          {showDeleteModal && (
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg w-full max-w-md shadow-lg space-y-4">
+              <h2 className="text-lg font-semibold text-red-500">
+                Delete Entry
+              </h2>
+
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Are you sure you want to delete this entry? <br />
+                This action cannot be undone.
+              </p>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  className="btn bg-red-500 text-white hover:bg-red-600 px-2 py-1 rounded-sm"
+                  onClick={() => {
+                    if (entryToDelete) handleDeleteEntry(entryToDelete);
+                    setShowDeleteModal(false);
+                    setEntryToDelete(null);
+                  }}
+                >
+                  Delete
+                </button>
+
+                <button
+                  className="btn-muted"
+                  onClick={() => setShowDeleteModal(false)}
                 >
                   Cancel
                 </button>
