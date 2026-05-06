@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { VaultProvider } from "@/lib/vaultContext";
+import { cn } from "@/lib/utils";
+
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Toaster } from "sonner";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,10 +32,26 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        "font-sans",
+        inter.variable,
+      )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <VaultProvider>{children}</VaultProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <VaultProvider>{children}</VaultProvider>
+          <Toaster theme="system"/>
+        </ThemeProvider>
       </body>
     </html>
   );
