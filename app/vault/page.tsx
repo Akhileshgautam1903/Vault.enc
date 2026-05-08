@@ -4,7 +4,7 @@ import { useVault } from "@/lib/vaultContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { Entry } from "@/model/entry";
+import type { Entry, FormErrors } from "@/model/entry";
 import { encryptVault } from "@/lib/clientCrypto";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,8 @@ const Vault = () => {
   const [newEntry, setNewEntry] = useState(emptyEntry);
   const [editEntry, setEditEntry] = useState<Entry | null>(null);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
+
+  const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     // push a duplicate history entry
@@ -82,12 +84,28 @@ const Vault = () => {
     setEntries(updatedEntries);
   };
 
+  //Check if the entry is not empty
+  const validateEntry = (entry: Entry) => {
+    const newErrors: FormErrors = {};
+
+    if (!entry.site) newErrors.site = "Site is required and cannot be empty.";
+    if (!entry.username) newErrors.username = "Username is required and cannot be empty.";
+    if (!entry.password) newErrors.password = "Password is required and cannot be empty.";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   //Create new Entry
   const handleAddEntry = () => {
     const entry: Entry = {
       id: crypto.randomUUID(),
       ...newEntry,
     };
+
+    if (!validateEntry(entry)) return;
+
     saveToVault([...entries, entry]);
     setShowAddModal(false);
     setNewEntry(emptyEntry);
@@ -102,6 +120,7 @@ const Vault = () => {
 
   //Update an Entry
   const handleEditEntry = () => {
+    if (!validateEntry(editEntry as Entry)) return;
     if (!editEntry) return;
     saveToVault(entries.map((e) => (e.id === editEntry.id ? editEntry : e)));
     setShowEditModal(false);
@@ -226,6 +245,7 @@ const Vault = () => {
           if (!open) {
             setShowAddModal(false);
             setNewEntry(emptyEntry);
+            setErrors({});
           }
         }}
       >
@@ -236,22 +256,43 @@ const Vault = () => {
           <div className="flex flex-col gap-3">
             <Input
               //className="input border-b-2 border-zinc-500 outline-none py-1"
+              className={
+                errors.site ? "border-red-500 focus-visible:ring-red-500" : ""
+              }
               placeholder="Site"
               value={newEntry.site}
               onChange={(e) =>
                 setNewEntry({ ...newEntry, site: e.target.value })
               }
             />
+            {errors.site && (
+              <p className="text-xs text-red-500">{errors.site}</p>
+            )}
+
             <Input
               //className="input border-b-2 border-zinc-500 outline-none py-1"
+              className={
+                errors.username
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              }
               placeholder="Username"
               value={newEntry.username}
               onChange={(e) =>
                 setNewEntry({ ...newEntry, username: e.target.value })
               }
             />
+            {errors.username && (
+              <p className="text-xs text-red-500">{errors.username}</p>
+            )}
+
             <Input
               //className="input border-b-2 border-zinc-500 outline-none py-1"
+              className={
+                errors.password
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              }
               type="password"
               placeholder="Password"
               value={newEntry.password}
@@ -259,6 +300,10 @@ const Vault = () => {
                 setNewEntry({ ...newEntry, password: e.target.value })
               }
             />
+            {errors.password && (
+              <p className="text-xs text-red-500">{errors.password}</p>
+            )}
+
             <Textarea
               //className="input border-b-2 border-zinc-500 outline-none py-1"
               placeholder="Notes (optional)"
@@ -282,6 +327,7 @@ const Vault = () => {
               onClick={() => {
                 setShowAddModal(false);
                 setNewEntry(emptyEntry);
+                setErrors({});
               }}
             >
               Cancel
@@ -291,7 +337,15 @@ const Vault = () => {
       </Dialog>
 
       {/* EDIT MODAL */}
-      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+      <Dialog
+        open={showEditModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowEditModal(false);
+            setErrors({});
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Entry</DialogTitle>
@@ -299,26 +353,51 @@ const Vault = () => {
           <div className="flex flex-col gap-3">
             <Input
               //className="input border-b-2 border-zinc-500 outline-none py-1"
+              className={
+                errors.site ? "border-red-500 focus-visible:ring-red-500" : ""
+              }
               value={editEntry?.site ?? ""}
               onChange={(e) =>
                 setEditEntry({ ...editEntry!, site: e.target.value })
               }
             />
+            {errors.site && (
+              <p className="text-xs text-red-500">{errors.site}</p>
+            )}
+
             <Input
               //className="input border-b-2 border-zinc-500 outline-none py-1"
+              className={
+                errors.username
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              }
               value={editEntry?.username ?? ""}
               onChange={(e) =>
                 setEditEntry({ ...editEntry!, username: e.target.value })
               }
             />
+            {errors.username && (
+              <p className="text-xs text-red-500">{errors.username}</p>
+            )}
+
             <Input
               //className="input border-b-2 border-zinc-500 outline-none py-1"
+              className={
+                errors.password
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              }
               type="password"
               value={editEntry?.password ?? ""}
               onChange={(e) =>
                 setEditEntry({ ...editEntry!, password: e.target.value })
               }
             />
+            {errors.password && (
+              <p className="text-xs text-red-500">{errors.password}</p>
+            )}
+
             <Textarea
               //className="input border-b-2 border-zinc-500 outline-none py-1"
               value={editEntry?.notes ?? ""}
@@ -338,7 +417,10 @@ const Vault = () => {
             <Button
               variant="outline"
               // className="btn-muted"
-              onClick={() => setShowEditModal(false)}
+              onClick={() => {
+                setShowEditModal(false);
+                setErrors({});
+              }}
             >
               Cancel
             </Button>
