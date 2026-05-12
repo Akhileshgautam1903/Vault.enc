@@ -18,6 +18,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import VaultSearch from "@/components/vault/VaultSearch";
+import { CirclePlus } from "lucide-react";
+import VaultEntryCard from "@/components/vault/VaultEntryCard";
 
 const Vault = () => {
   const { entries, setEntries, masterPassword, setMasterPassword } = useVault();
@@ -89,8 +92,10 @@ const Vault = () => {
     const newErrors: FormErrors = {};
 
     if (!entry.site) newErrors.site = "Site is required and cannot be empty.";
-    if (!entry.username) newErrors.username = "Username is required and cannot be empty.";
-    if (!entry.password) newErrors.password = "Password is required and cannot be empty.";
+    if (!entry.username)
+      newErrors.username = "Username is required and cannot be empty.";
+    if (!entry.password)
+      newErrors.password = "Password is required and cannot be empty.";
 
     setErrors(newErrors);
 
@@ -151,9 +156,11 @@ const Vault = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen items-center bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans">
+    <div //className="flex flex-col min-h-screen items-center bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans"
+      className="w-full max-w-4xl px-4 mx-auto"
+    >
       {/* HEADER */}
-      <div className="flex justify-between items-center w-full max-w-4xl px-4 py-6">
+      <div className="flex justify-between items-center py-6">
         <h1 className="text-3xl font-semibold tracking-tight">Vault.enc</h1>
         <Button
           //className="px-4 py-1.5 text-sm border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -168,72 +175,35 @@ const Vault = () => {
       </div>
 
       {/* SEARCH */}
-      <Input
-        type="text"
-        placeholder="Search site..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="w-full max-w-4xl px-4 py-2 mb-4 border rounded-md bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300"
-      />
 
       {/* ADD BUTTON */}
-      <div className="w-full max-w-4xl flex justify-end mb-4 px-2">
+      <div className="flex mb-4 gap-2">
+        <VaultSearch value={searchText} onchange={setSearchText} />
         <Button
           variant="default"
           onClick={() => setShowAddModal(true)}
           //className="px-4 py-2 text-sm bg-black text-white rounded-md hover:bg-zinc-800 dark:bg-white dark:text-black"
         >
+          <CirclePlus />
           Add Entry
         </Button>
       </div>
 
       {/* ENTRY LIST */}
-      <div className="w-full max-w-4xl space-y-3 px-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filteredEnteries.map((entry) => (
-          <div
+          <VaultEntryCard
             key={entry.id}
-            className="flex justify-between items-center p-4 border rounded-lg bg-white dark:bg-zinc-900 shadow-sm"
-          >
-            <div>
-              <p className="font-medium">{entry.site}</p>
-              <p className="text-sm text-zinc-500">{entry.username}</p>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                //className="text-sm px-3 py-1 border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                onClick={() => {
-                  navigator.clipboard.writeText(entry.password);
-                  toast.success("Password copied!", {
-                    position: "bottom-center",
-                  });
-                }}
-              >
-                Copy
-              </Button>
-              <Button
-                variant="destructive"
-                //className="text-sm px-3 py-1 border rounded-md hover:bg-red-100 dark:hover:bg-red-900 text-red-500"
-                onClick={() => {
-                  setEntryToDelete(entry.id);
-                  setShowDeleteModal(true);
-                }}
-              >
-                Delete
-              </Button>
-              <Button
-                variant="ghost"
-                //className="text-sm px-3 py-1 border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                onClick={() => {
-                  setEditEntry(entry);
-                  setShowEditModal(true);
-                }}
-              >
-                Edit
-              </Button>
-            </div>
-          </div>
+            entry={entry}
+            onEdit={(entry) => {
+              setEditEntry(entry);
+              setShowEditModal(true);
+            }}
+            onDelete={(id) => {
+              setEntryToDelete(id);
+              setShowDeleteModal(true);
+            }}
+          />
         ))}
       </div>
 
@@ -313,7 +283,7 @@ const Vault = () => {
               }
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col gap-2">
             <Button
               variant="default"
               //className="btn"
