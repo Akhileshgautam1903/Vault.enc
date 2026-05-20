@@ -13,7 +13,6 @@ import {
   Trash,
   User,
 } from "lucide-react";
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useState } from "react";
 
 type VaultEntryProp = {
@@ -22,29 +21,24 @@ type VaultEntryProp = {
   onDelete: (id: string) => void;
 };
 
-const VaultEntryCard = ({
-  entry,
-  onEdit,
-  onDelete,
-}: VaultEntryProp) => {
-  const { copyToClipboard } = useCopyToClipboard();
-
+const VaultEntryCard = ({ entry, onEdit, onDelete }: VaultEntryProp) => {
   const [showPassword, setShowPassword] = useState(false);
   const [copiedField, setCopiedField] = useState<
     "username" | "password" | null
   >(null);
 
-  const handleCopy = async (
-    text: string,
-    field: "username" | "password"
-  ) => {
-    await copyToClipboard(text);
+  const handleCopy = async (text: string, field: "username" | "password") => {
+    try {
+      await navigator.clipboard.writeText(text);
 
-    setCopiedField(field);
+      setCopiedField(field);
 
-    setTimeout(() => {
-      setCopiedField(null);
-    }, 1500);
+      setTimeout(() => {
+        setCopiedField(null);
+      }, 1500);
+    } catch (err) {
+      console.error("Failed to copy", err);
+    }
   };
 
   return (
@@ -53,11 +47,7 @@ const VaultEntryCard = ({
         <CardTitle className="truncate">{entry.site}</CardTitle>
 
         <div className="flex gap-1">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => onEdit(entry)}
-          >
+          <Button size="icon" variant="outline" onClick={() => onEdit(entry)}>
             <Edit />
           </Button>
 
@@ -75,10 +65,7 @@ const VaultEntryCard = ({
         {/* Username */}
         <div className="flex items-center w-full justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <User
-              className="shrink-0 text-muted-foreground"
-              size={16}
-            />
+            <User className="shrink-0 text-muted-foreground" size={16} />
 
             <p className="truncate">{entry.username}</p>
           </div>
@@ -86,15 +73,9 @@ const VaultEntryCard = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() =>
-              handleCopy(entry.username, "username")
-            }
+            onClick={() => handleCopy(entry.username, "username")}
           >
-            {copiedField === "username" ? (
-              <Check />
-            ) : (
-              <Copy />
-            )}
+            {copiedField === "username" ? <Check /> : <Copy />}
           </Button>
         </div>
 
@@ -117,9 +98,7 @@ const VaultEntryCard = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() =>
-                setShowPassword((prev) => !prev)
-              }
+              onClick={() => setShowPassword((prev) => !prev)}
             >
               {showPassword ? <Eye /> : <EyeOff />}
             </Button>
@@ -127,15 +106,9 @@ const VaultEntryCard = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() =>
-                handleCopy(entry.password, "password")
-              }
+              onClick={() => handleCopy(entry.password, "password")}
             >
-              {copiedField === "password" ? (
-                <Check />
-              ) : (
-                <Copy />
-              )}
+              {copiedField === "password" ? <Check /> : <Copy />}
             </Button>
           </div>
         </div>

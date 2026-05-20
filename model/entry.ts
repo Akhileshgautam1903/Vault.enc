@@ -11,7 +11,7 @@ export type Vault = {
 };
 
 export type FormErrors = {
-  site?: string;
-  username?: string;
-  password?: string;
+  site?: boolean;
+  username?: boolean;
+  password?: boolean;
 };
