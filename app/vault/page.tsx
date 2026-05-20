@@ -4,29 +4,33 @@ import { useVault } from "@/lib/vaultContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { Entry, FormErrors } from "@/model/entry";
+import type { Entry } from "@/model/entry";
 import { encryptVault } from "@/lib/clientCrypto";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogFooter,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import VaultSearch from "@/components/vault/VaultSearch";
-import { CirclePlus } from "lucide-react";
+import { CirclePlus, Lock } from "lucide-react";
 import VaultEntryCard from "@/components/vault/VaultEntryCard";
+import ModalForm from "@/components/vault/ModalForm";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 
 const Vault = () => {
   const { entries, setEntries, masterPassword, setMasterPassword } = useVault();
   const router = useRouter();
-
-  const emptyEntry = { site: "", username: "", password: "", notes: "" };
 
   const [searchText, setSearchText] = useState<string>("");
   const [filename, setFilename] = useState<string>("vault");
@@ -37,11 +41,8 @@ const Vault = () => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
-  const [newEntry, setNewEntry] = useState(emptyEntry);
   const [editEntry, setEditEntry] = useState<Entry | null>(null);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
-
-  const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     // push a duplicate history entry
@@ -87,33 +88,15 @@ const Vault = () => {
     setEntries(updatedEntries);
   };
 
-  //Check if the entry is not empty
-  const validateEntry = (entry: Entry) => {
-    const newErrors: FormErrors = {};
-
-    if (!entry.site) newErrors.site = "Site is required and cannot be empty.";
-    if (!entry.username)
-      newErrors.username = "Username is required and cannot be empty.";
-    if (!entry.password)
-      newErrors.password = "Password is required and cannot be empty.";
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
   //Create new Entry
-  const handleAddEntry = () => {
+  const handleAddEntry = (newFormEntry: Omit<Entry, "id">) => {
     const entry: Entry = {
       id: crypto.randomUUID(),
-      ...newEntry,
+      // ...newEntry,
+      ...newFormEntry,
     };
 
-    if (!validateEntry(entry)) return;
-
     saveToVault([...entries, entry]);
-    setShowAddModal(false);
-    setNewEntry(emptyEntry);
     toast.success("Entry saved.", { position: "bottom-center" });
   };
 
@@ -124,12 +107,17 @@ const Vault = () => {
   };
 
   //Update an Entry
-  const handleEditEntry = () => {
-    if (!validateEntry(editEntry as Entry)) return;
+  const handleEditEntry = (editFormEntry: Omit<Entry, "id">) => {
     if (!editEntry) return;
-    saveToVault(entries.map((e) => (e.id === editEntry.id ? editEntry : e)));
-    setShowEditModal(false);
-    setEditEntry(null);
+
+    const updatedEntry: Entry = {
+      id: editEntry.id,
+      ...editFormEntry,
+    };
+
+    saveToVault(
+      entries.map((e) => (e.id === updatedEntry.id ? updatedEntry : e)),
+    );
     toast.success("Entry Updated.", { position: "bottom-center" });
   };
 
@@ -156,34 +144,26 @@ const Vault = () => {
   };
 
   return (
-    <div //className="flex flex-col min-h-screen items-center bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans"
-      className="w-full max-w-4xl px-4 mx-auto"
-    >
+    <div className="w-full max-w-4xl px-4 mx-auto">
       {/* HEADER */}
       <div className="flex justify-between items-center py-6">
         <h1 className="text-3xl font-semibold tracking-tight">Vault.enc</h1>
         <Button
-          //className="px-4 py-1.5 text-sm border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
           variant="default"
           onClick={() => {
             setShowLockModal(true);
             setIsLeaving(false);
           }}
         >
-          Lock
+          <Lock />
+          Lock & Export
         </Button>
       </div>
 
-      {/* SEARCH */}
-
-      {/* ADD BUTTON */}
+      {/* SEARCH & ADD BUTTON */}
       <div className="flex mb-4 gap-2">
         <VaultSearch value={searchText} onchange={setSearchText} />
-        <Button
-          variant="default"
-          onClick={() => setShowAddModal(true)}
-          //className="px-4 py-2 text-sm bg-black text-white rounded-md hover:bg-zinc-800 dark:bg-white dark:text-black"
-        >
+        <Button variant="default" onClick={() => setShowAddModal(true)}>
           <CirclePlus />
           Add Entry
         </Button>
@@ -207,196 +187,22 @@ const Vault = () => {
         ))}
       </div>
 
-      {/* MODALS */}
+      {/* MODAL COMPONENTS */}
       {/* ADD MODAL */}
-      <Dialog
+      <ModalForm
         open={showAddModal}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowAddModal(false);
-            setNewEntry(emptyEntry);
-            setErrors({});
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Entry</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            <Input
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              className={
-                errors.site ? "border-red-500 focus-visible:ring-red-500" : ""
-              }
-              placeholder="Site"
-              value={newEntry.site}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, site: e.target.value })
-              }
-            />
-            {errors.site && (
-              <p className="text-xs text-red-500">{errors.site}</p>
-            )}
-
-            <Input
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              className={
-                errors.username
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              }
-              placeholder="Username"
-              value={newEntry.username}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, username: e.target.value })
-              }
-            />
-            {errors.username && (
-              <p className="text-xs text-red-500">{errors.username}</p>
-            )}
-
-            <Input
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              className={
-                errors.password
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              }
-              type="password"
-              placeholder="Password"
-              value={newEntry.password}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, password: e.target.value })
-              }
-            />
-            {errors.password && (
-              <p className="text-xs text-red-500">{errors.password}</p>
-            )}
-
-            <Textarea
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              placeholder="Notes (optional)"
-              value={newEntry.notes}
-              onChange={(e) =>
-                setNewEntry({ ...newEntry, notes: e.target.value })
-              }
-            />
-          </div>
-          <DialogFooter className="flex-col gap-2">
-            <Button
-              variant="default"
-              //className="btn"
-              onClick={handleAddEntry}
-            >
-              Save
-            </Button>
-            <Button
-              variant="outline"
-              //className="btn-muted"
-              onClick={() => {
-                setShowAddModal(false);
-                setNewEntry(emptyEntry);
-                setErrors({});
-              }}
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setShowAddModal}
+        onSubmit={handleAddEntry}
+      />
 
       {/* EDIT MODAL */}
-      <Dialog
+      <ModalForm
+        key={editEntry?.id}
         open={showEditModal}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowEditModal(false);
-            setErrors({});
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Entry</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            <Input
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              className={
-                errors.site ? "border-red-500 focus-visible:ring-red-500" : ""
-              }
-              value={editEntry?.site ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, site: e.target.value })
-              }
-            />
-            {errors.site && (
-              <p className="text-xs text-red-500">{errors.site}</p>
-            )}
-
-            <Input
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              className={
-                errors.username
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              }
-              value={editEntry?.username ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, username: e.target.value })
-              }
-            />
-            {errors.username && (
-              <p className="text-xs text-red-500">{errors.username}</p>
-            )}
-
-            <Input
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              className={
-                errors.password
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              }
-              type="password"
-              value={editEntry?.password ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, password: e.target.value })
-              }
-            />
-            {errors.password && (
-              <p className="text-xs text-red-500">{errors.password}</p>
-            )}
-
-            <Textarea
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
-              value={editEntry?.notes ?? ""}
-              onChange={(e) =>
-                setEditEntry({ ...editEntry!, notes: e.target.value })
-              }
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="default"
-              // className="btn"
-              onClick={handleEditEntry}
-            >
-              Save
-            </Button>
-            <Button
-              variant="outline"
-              // className="btn-muted"
-              onClick={() => {
-                setShowEditModal(false);
-                setErrors({});
-              }}
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setShowEditModal}
+        onSubmit={handleEditEntry}
+        defaultValues={editEntry ?? undefined}
+      />
 
       {/* LOCK MODAL */}
       <Dialog
@@ -406,30 +212,27 @@ const Vault = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Export Vault</DialogTitle>
+            <DialogDescription>
+              This will encrypt and export your file (in .enc extension)
+            </DialogDescription>
           </DialogHeader>
-          <p className="text-sm text-zinc-500">
-            {isLeaving && "You are leaving."} Please Export your vault file.
-          </p>
-          <div className="flex items-center gap-1">
-            <Input
-              //className="input border-b-2 border-zinc-500 outline-none py-1"
+          {isLeaving && "You are leaving."} Please Export your vault file.
+          <InputGroup>
+            <InputGroupInput
               placeholder="Filename"
               value={filename}
               onChange={(e) => setFilename(e.target.value)}
             />
-            {/* .enc */}
-          </div>
+            <InputGroupAddon align="inline-end">
+              <InputGroupText>.enc</InputGroupText>
+            </InputGroupAddon>
+          </InputGroup>
           <DialogFooter>
-            <Button
-              variant="default"
-              // className="btn"
-              onClick={handleExportAndLock}
-            >
+            <Button variant="default" onClick={handleExportAndLock}>
               Export & Lock
             </Button>
             <Button
               variant="outline"
-              // className="btn-muted"
               onClick={() => {
                 setShowLockModal(false);
                 setIsLeaving(false);
@@ -446,15 +249,17 @@ const Vault = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Entry</DialogTitle>
+            <DialogDescription>
+              This action will permanently delete the entry
+            </DialogDescription>
           </DialogHeader>
-          <p className="text-sm text-zinc-500">
+          <p>
             Are you sure you want to delete this entry? This action cannot be
             undone.
           </p>
           <DialogFooter>
             <Button
               variant="destructive"
-              // className="btn bg-red-500 text-white hover:bg-red-600 px-2 py-1 rounded-sm"
               onClick={() => {
                 if (entryToDelete) handleDeleteEntry(entryToDelete);
                 setShowDeleteModal(false);
@@ -464,11 +269,7 @@ const Vault = () => {
               Delete
             </Button>
 
-            <Button
-              variant="outline"
-              // className="btn-muted"
-              onClick={() => setShowDeleteModal(false)}
-            >
+            <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
               Cancel
             </Button>
           </DialogFooter>
