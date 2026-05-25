@@ -5,71 +5,166 @@ import { useRouter } from "next/navigation";
 import { useVault } from "@/lib/vaultContext";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { AlertCircleIcon, Eye, EyeOff, RectangleEllipsis } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Silk from "@/components/Silk";
 
 export default function page() {
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
-
   const { setMasterPassword } = useVault();
-
   const router = useRouter();
 
-  //Check if the password and confirm password matches
-  const handleClick = () => {
-    if (isMatch()) initializeVault();
-    else setError("Password do not match");
-  };
+  const [error, setError] = useState({
+    masterPwd: false,
+    confirmPwd: false,
+    equal: true,
+  });
 
-  const isMatch = () =>
-    password.length > 0 && password.trim() == confirmPassword.trim();
+  const [showMasterPassword, setMasterShowPassword] = useState(false);
+  const [showConfirmPassword, setConfirmShowPassword] = useState(false);
 
-  //Api for saving the data and redirecting to /vault
-  const initializeVault = () => {
-    setMasterPassword(password);
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const masterPassword = formData.get("master-pwd") as string;
+    const confirmPassword = formData.get("confirm-pwd") as string;
+
+    const errors = {
+      masterPwd: false,
+      confirmPwd: false,
+      equal: true,
+    };
+
+    let hasError = false;
+
+    if (!masterPassword) {
+      errors.masterPwd = true;
+      hasError = true;
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPwd = true;
+      hasError = true;
+    }
+
+    if (masterPassword !== confirmPassword) {
+      errors.equal = false;
+      hasError = true;
+    }
+
+    setError(errors);
+
+    if (hasError) return;
+
+    setMasterPassword(masterPassword);
     router.push("/vault");
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans px-4">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border dark:border-zinc-800 space-y-5">
-        <h1 className="text-2xl font-semibold text-center tracking-tight">
-          Set Master Password
-        </h1>
-
-        {/* PASSWORD */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-zinc-500">Master Password</label>
-          <Input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+    <div className="flex min-h-screen">
+      <div className="flex w-full items-center justify-center px-4">
+        <div className="w-full max-w-sm">
+          <form onSubmit={handleSubmit}>
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-1 text-center">
+                <h1 className="text-2xl font-bold">
+                  Set a master password for your vault
+                </h1>
+                <p className="text-sm text-balance text-muted-foreground">
+                  This password is important, pls remeber this
+                </p>
+              </div>
+              <Field data-invalid={error.masterPwd}>
+                <FieldLabel htmlFor="master-pwd">
+                  Master Password <span className="text-destructive">*</span>
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type={showMasterPassword ? "text" : "password"}
+                    placeholder="master assword"
+                    name="master-pwd"
+                    aria-invalid={error.masterPwd}
+                  />
+                  <InputGroupAddon>
+                    <RectangleEllipsis />
+                  </InputGroupAddon>
+                  <InputGroupAddon align={"inline-end"}>
+                    <InputGroupButton
+                      variant="ghost"
+                      onClick={() => setMasterShowPassword((prev) => !prev)}
+                    >
+                      {showMasterPassword ? <EyeOff /> : <Eye />}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
+                {error.masterPwd && (
+                  <FieldError>Master password is required.</FieldError>
+                )}
+              </Field>
+              <Field data-invalid={error.confirmPwd}>
+                <FieldLabel htmlFor="confirm-pwd">
+                  Confirm Password <span className="text-destructive">*</span>
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="confirm password"
+                    name="confirm-pwd"
+                    aria-invalid={error.confirmPwd}
+                  />
+                  <InputGroupAddon>
+                    <RectangleEllipsis />
+                  </InputGroupAddon>
+                  <InputGroupAddon align={"inline-end"}>
+                    <InputGroupButton
+                      variant="ghost"
+                      onClick={() => setConfirmShowPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? <EyeOff /> : <Eye />}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
+                {error.confirmPwd && (
+                  <FieldError>Confirm password is required.</FieldError>
+                )}
+              </Field>
+              {!error.equal && (
+                <Alert variant="destructive" className="max-w-md">
+                  <AlertCircleIcon />
+                  <AlertTitle>Passwords do not match</AlertTitle>
+                  <AlertDescription>
+                    Master and confirm password should be the same.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </FieldGroup>
+            <Button type="submit" className="mt-4 w-full">
+              Continue
+            </Button>
+          </form>
         </div>
-
-        {/* CONFIRM PASSWORD */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-zinc-500">Confirm Password</label>
-          <Input
-            type="password"
-            placeholder="Re-enter password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
-
-        {/* BUTTON */}
-        <Button
-          onClick={() => handleClick()}
-          className="w-full"
-        >
-          Continue
-        </Button>
-
-        {/* ERROR */}
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      </div>
+      <div className="hidden lg:block lg:w-3/4 relative overflow-hidden m-2 rounded-md">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#b96dfa"
+          noiseIntensity={1.5}
+          rotation={0.5}
+        />
       </div>
     </div>
   );
