@@ -1,25 +1,44 @@
 "use client";
 
+import Silk from "@/components/Silk";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import VaultLogo from "@/components/vault/VaultLogo";
 import { useVault } from "@/lib/vaultContext";
+import {
+  AlertCircleIcon,
+  Eye,
+  EyeOff,
+  File,
+  RectangleEllipsis,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const Unlock = () => {
-  const [password, setPassword] = useState<string>("");
-  const [fileContents, setFileContents] = useState<string>("");
-  const [error, setError] = useState<string>("");
-
   // using router for navigation
   const router = useRouter();
 
   // getting updater function from vaultContext
   const { setEntries, setMasterPassword } = useVault();
 
-  const handleClick = async () => {
+  const unlockVault = async (masterPassword: string, fileContents: string) => {
     const res = await fetch("/api/unlock", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ masterPassword: password, fileContents }),
+      body: JSON.stringify({ masterPassword, fileContents }),
     });
 
     if (res.ok) {
@@ -28,62 +47,153 @@ const Unlock = () => {
 
       //Populated the vaultContext
       setEntries(data);
-      setMasterPassword(password);
+      setMasterPassword(masterPassword);
 
       //redirect to /vault
       router.push("/vault");
-    } else setError("Incorrect Master Password");
+    } else setWrongPwd(true);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const [error, setError] = useState({
+    encFile: false,
+    password: false,
+  });
 
-    const reader = new FileReader();
-    reader.onload = (e) => setFileContents(e.target?.result as string);
-    reader.readAsText(file);
+  const [showPassword, setShowPassword] = useState(false);
+  const [wrongPwd, setWrongPwd] = useState(false);
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const file = formData.get("enc-file") as File;
+    const password = formData.get("pwd") as string;
+
+    const errors = {
+      encFile: false,
+      password: false,
+    };
+
+    let hasError = false;
+
+    if (!file || file.size === 0) {
+      errors.encFile = true;
+      hasError = true;
+    } else if (!file.name.endsWith(".enc")) {
+      errors.encFile = true;
+      hasError = true;
+    }
+
+    if (!password) {
+      errors.password = true;
+      hasError = true;
+    }
+
+    setError(errors);
+
+    if (hasError) return;
+
+    try {
+      const fileContents = await file.text();
+
+      //state update in react is async so it takes the old pwd and file contents and make the request
+      // setPassword(password);
+      // setFileContents(fileContents);
+
+      await unlockVault(password, fileContents);
+
+      // your decrypt logic here
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans px-4">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border dark:border-zinc-800 space-y-5">
-        <h1 className="text-2xl font-semibold text-center tracking-tight">
-          Unlock Vault
-        </h1>
-
-        {/* FILE INPUT */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-zinc-500">Encrypted File</label>
-          <input
-            type="file"
-            accept=".enc"
-            onChange={(e) => handleFileChange(e)}
-            className="text-sm file:mr-3 file:px-3 file:py-1.5 file:border-0 file:rounded-md file:bg-zinc-200 dark:file:bg-zinc-700 file:text-zinc-800 dark:file:text-zinc-200 cursor-pointer"
-          />
+    <div className="flex min-h-screen relative">
+      <VaultLogo />
+      <div className="flex w-full items-center justify-center px-4">
+        <div className="w-full max-w-sm">
+          <form onSubmit={handleSubmit}>
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-1 text-center">
+                <h1 className="text-4xl font-serif">
+                  Access your <span className="accent-text">vault</span>
+                </h1>
+                <p className="text-sm text-balance text-muted-foreground">
+                  Bring your .enc file and your password to unlock.
+                </p>
+              </div>
+              <Field data-invalid={error.encFile}>
+                <FieldLabel htmlFor="enc-file" className="font-serif text-xl">
+                  Encrypted File <span className="text-destructive">*</span>
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type="file"
+                    accept=".enc"
+                    name="enc-file"
+                    aria-invalid={error.encFile}
+                  />
+                  <InputGroupAddon>
+                    <File />
+                  </InputGroupAddon>
+                </InputGroup>
+                {error.encFile && (
+                  <FieldError>Encrypted file is required and should be of .enc file extenstion.</FieldError>
+                )}
+              </Field>
+              <Field data-invalid={error.password}>
+                <FieldLabel htmlFor="pwd" className="font-serif text-xl">
+                  Password <span className="text-destructive">*</span>
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type={showPassword ? "text" : "password"}
+                    placeholder="confirm password"
+                    name="pwd"
+                    aria-invalid={error.password}
+                  />
+                  <InputGroupAddon>
+                    <RectangleEllipsis />
+                  </InputGroupAddon>
+                  <InputGroupAddon align={"inline-end"}>
+                    <InputGroupButton
+                      variant="ghost"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? <EyeOff /> : <Eye />}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
+                {error.password && (
+                  <FieldError>Password is required.</FieldError>
+                )}
+              </Field>
+              {wrongPwd && (
+                <Alert variant="destructive" className="max-w-md">
+                  <AlertCircleIcon />
+                  <AlertTitle>Incorrect Password</AlertTitle>
+                  <AlertDescription>
+                    Please enter the correct password to decrypt the file.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </FieldGroup>
+            <Button type="submit" className="mt-4 w-full font-serif text-xl">
+              Continue
+            </Button>
+          </form>
         </div>
-
-        {/* PASSWORD INPUT */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-zinc-500">Master Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
-            className="w-full px-3 py-2 border rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-300 text-sm"
-          />
-        </div>
-
-        {/* SUBMIT BUTTON */}
-        <button
-          onClick={() => handleClick()}
-          className="w-full py-2 text-sm font-medium bg-black text-white rounded-md hover:bg-zinc-800 transition dark:bg-white dark:text-black"
-        >
-          Unlock
-        </button>
-
-        {/* ERROR */}
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      </div>
+      <div className="hidden lg:block lg:w-3/4 relative overflow-hidden m-2 rounded-md">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#b96dfa"
+          noiseIntensity={1.5}
+          rotation={0.5}
+        />
       </div>
     </div>
   );
