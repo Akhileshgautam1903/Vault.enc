@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { VaultProvider } from "@/lib/vaultContext";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,12 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  weight: "400",
+  variable: "--font-serif",
   subsets: ["latin"],
 });
 
@@ -39,6 +45,7 @@ export default function RootLayout({
         geistMono.variable,
         "font-sans",
         inter.variable,
+        instrumentSerif.variable
       )}
       suppressHydrationWarning
     >
