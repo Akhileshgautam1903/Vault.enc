@@ -14,6 +14,7 @@ const VaultSearch = ({ value, onchange }: VaultSearchProps) => {
   return (
     <InputGroup>
       <InputGroupInput
+        className="font-serif text-lg!"
         placeholder="Search..."
         value={value}
         onChange={(e) => onchange(e.target.value)}

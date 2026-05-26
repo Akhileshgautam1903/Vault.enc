@@ -20,6 +20,7 @@ import {
 import { AlertCircleIcon, Eye, EyeOff, RectangleEllipsis } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Silk from "@/components/Silk";
+import VaultLogo from "@/components/vault/VaultLogo";
 
 export default function page() {
   const { setMasterPassword } = useVault();
@@ -74,27 +75,28 @@ export default function page() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen relative">
+      <VaultLogo />
       <div className="flex w-full items-center justify-center px-4">
         <div className="w-full max-w-sm">
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-1 text-center">
-                <h1 className="text-2xl font-bold">
-                  Set a master password for your vault
+                <h1 className="text-3xl font-serif">
+                  Set a master password for your <span className="accent-text">vault</span>
                 </h1>
                 <p className="text-sm text-balance text-muted-foreground">
-                  This password is important, pls remeber this
+                  Set a password you can remember — this cannot be recovered if lost.
                 </p>
               </div>
               <Field data-invalid={error.masterPwd}>
-                <FieldLabel htmlFor="master-pwd">
+                <FieldLabel htmlFor="master-pwd" className="font-serif text-xl">
                   Master Password <span className="text-destructive">*</span>
                 </FieldLabel>
                 <InputGroup>
                   <InputGroupInput
                     type={showMasterPassword ? "text" : "password"}
-                    placeholder="master assword"
+                    placeholder="eg. pwd@123"
                     name="master-pwd"
                     aria-invalid={error.masterPwd}
                   />
@@ -115,13 +117,13 @@ export default function page() {
                 )}
               </Field>
               <Field data-invalid={error.confirmPwd}>
-                <FieldLabel htmlFor="confirm-pwd">
+                <FieldLabel htmlFor="confirm-pwd" className="font-serif text-xl">
                   Confirm Password <span className="text-destructive">*</span>
                 </FieldLabel>
                 <InputGroup>
                   <InputGroupInput
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="confirm password"
+                    placeholder="eg. pwd@123"
                     name="confirm-pwd"
                     aria-invalid={error.confirmPwd}
                   />
@@ -146,12 +148,12 @@ export default function page() {
                   <AlertCircleIcon />
                   <AlertTitle>Passwords do not match</AlertTitle>
                   <AlertDescription>
-                    Master and confirm password should be the same.
+                    Master password and confirm password should be the same.
                   </AlertDescription>
                 </Alert>
               )}
             </FieldGroup>
-            <Button type="submit" className="mt-4 w-full">
+            <Button type="submit" className="mt-4 w-full font-serif text-xl">
               Continue
             </Button>
           </form>

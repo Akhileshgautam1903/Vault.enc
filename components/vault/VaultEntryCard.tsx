@@ -44,7 +44,9 @@ const VaultEntryCard = ({ entry, onEdit, onDelete }: VaultEntryProp) => {
   return (
     <Card size="sm">
       <CardHeader className="flex items-center justify-between">
-        <CardTitle className="truncate">{entry.site}</CardTitle>
+        <CardTitle>
+          <span className="font-serif text-xl">{entry.site}</span>
+        </CardTitle>
 
         <div className="flex gap-1">
           <Button size="icon" variant="outline" onClick={() => onEdit(entry)}>
