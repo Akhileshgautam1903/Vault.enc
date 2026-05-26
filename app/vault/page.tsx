@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import VaultSearch from "@/components/vault/VaultSearch";
-import { CirclePlus, Lock } from "lucide-react";
+import { CirclePlus, Ghost, Lock, Telescope } from "lucide-react";
 import VaultEntryCard from "@/components/vault/VaultEntryCard";
 import ModalForm from "@/components/vault/ModalForm";
 import {
@@ -27,6 +27,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
+import VaultLogo from "@/components/vault/VaultLogo";
 
 const Vault = () => {
   const { entries, setEntries, masterPassword, setMasterPassword } = useVault();
@@ -79,7 +80,7 @@ const Vault = () => {
     };
   }, []);
 
-  const filteredEnteries = entries.filter((e) =>
+  const filteredEntries = entries.filter((e) =>
     e.site.toLowerCase().includes(searchText.toLowerCase()),
   );
 
@@ -144,11 +145,13 @@ const Vault = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl px-4 mx-auto">
+    <div className="w-full max-w-4xl px-4 mx-auto relative min-h-screen">
+      <VaultLogo />
       {/* HEADER */}
-      <div className="flex justify-between items-center py-6">
-        <h1 className="text-3xl font-semibold tracking-tight">Vault.enc</h1>
+      <div className="flex justify-end items-center py-6">
+        {/* <h1 className="text-3xl font-semibold tracking-tight">Vault.enc</h1> */}
         <Button
+          className="font-serif text-md"
           variant="default"
           onClick={() => {
             setShowLockModal(true);
@@ -163,29 +166,51 @@ const Vault = () => {
       {/* SEARCH & ADD BUTTON */}
       <div className="flex mb-4 gap-2">
         <VaultSearch value={searchText} onchange={setSearchText} />
-        <Button variant="default" onClick={() => setShowAddModal(true)}>
+        <Button
+          variant="default"
+          className="font-serif text-md"
+          onClick={() => setShowAddModal(true)}
+        >
           <CirclePlus />
           Add Entry
         </Button>
       </div>
 
       {/* ENTRY LIST */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {filteredEnteries.map((entry) => (
-          <VaultEntryCard
-            key={entry.id}
-            entry={entry}
-            onEdit={(entry) => {
-              setEditEntry(entry);
-              setShowEditModal(true);
-            }}
-            onDelete={(id) => {
-              setEntryToDelete(id);
-              setShowDeleteModal(true);
-            }}
-          />
-        ))}
-      </div>
+      {entries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center border-muted border-dashed rounded-md border-2 min-h-[80vh] font-serif text-4xl px-5 gap-5">
+          <Ghost className="size-24 text-accent" />{" "}
+          <p>
+            Spooky is lonely... <br /> Add some{" "}
+            <span className="accent-text">company</span>.
+          </p>
+        </div>
+      ) : filteredEntries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center border-muted border-dashed rounded-md border-2 min-h-[80vh] font-serif text-4xl px-5 gap-5">
+          <Telescope className="size-24 text-accent" />{" "}
+          <p>
+            Nothing in sight... <br /> try a different{" "}
+            <span className="accent-text">search</span>.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {filteredEntries.map((entry) => (
+            <VaultEntryCard
+              key={entry.id}
+              entry={entry}
+              onEdit={(entry) => {
+                setEditEntry(entry);
+                setShowEditModal(true);
+              }}
+              onDelete={(id) => {
+                setEntryToDelete(id);
+                setShowDeleteModal(true);
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* MODAL COMPONENTS */}
       {/* ADD MODAL */}
@@ -211,7 +236,9 @@ const Vault = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Export Vault</DialogTitle>
+            <DialogTitle className="font-serif text-2xl">
+              Export <span className="accent-text">Vault</span>
+            </DialogTitle>
             <DialogDescription>
               This will encrypt and export your file (in .enc extension)
             </DialogDescription>
@@ -228,10 +255,15 @@ const Vault = () => {
             </InputGroupAddon>
           </InputGroup>
           <DialogFooter>
-            <Button variant="default" onClick={handleExportAndLock}>
+            <Button
+              className="text-lg font-serif"
+              variant="default"
+              onClick={handleExportAndLock}
+            >
               Export & Lock
             </Button>
             <Button
+              className="text-lg font-serif"
               variant="outline"
               onClick={() => {
                 setShowLockModal(false);
@@ -248,9 +280,11 @@ const Vault = () => {
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Entry</DialogTitle>
+            <DialogTitle className="font-serif text-2xl">
+              Delete <span className="accent-text">Entry</span>
+            </DialogTitle>
             <DialogDescription>
-              This action will permanently delete the entry
+              This action will permanently delete the entry.
             </DialogDescription>
           </DialogHeader>
           <p>
@@ -259,6 +293,7 @@ const Vault = () => {
           </p>
           <DialogFooter>
             <Button
+              className="text-lg font-serif"
               variant="destructive"
               onClick={() => {
                 if (entryToDelete) handleDeleteEntry(entryToDelete);
@@ -269,7 +304,11 @@ const Vault = () => {
               Delete
             </Button>
 
-            <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
+            <Button
+              className="text-lg font-serif"
+              variant="outline"
+              onClick={() => setShowDeleteModal(false)}
+            >
               Cancel
             </Button>
           </DialogFooter>
