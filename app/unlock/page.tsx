@@ -111,8 +111,17 @@ const Unlock = () => {
 
   return (
     <div className="flex min-h-screen relative">
-      <VaultLogo />
-      <div className="flex w-full items-center justify-center px-4">
+      <div className="hidden lg:block lg:w-3/4 relative overflow-hidden m-2 rounded-md">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#b96dfa"
+          noiseIntensity={1.5}
+          rotation={0.5}
+        />
+      </div>
+      <div className="flex w-full items-center justify-center px-4 relative">
+        <VaultLogo />
         <div className="w-full max-w-sm">
           <form onSubmit={handleSubmit}>
             <FieldGroup>
@@ -140,7 +149,10 @@ const Unlock = () => {
                   </InputGroupAddon>
                 </InputGroup>
                 {error.encFile && (
-                  <FieldError>Encrypted file is required and should be of .enc file extenstion.</FieldError>
+                  <FieldError>
+                    Encrypted file is required and should be of .enc file
+                    extenstion.
+                  </FieldError>
                 )}
               </Field>
               <Field data-invalid={error.password}>
@@ -150,7 +162,7 @@ const Unlock = () => {
                 <InputGroup>
                   <InputGroupInput
                     type={showPassword ? "text" : "password"}
-                    placeholder="confirm password"
+                    placeholder="eg. pwd@123"
                     name="pwd"
                     aria-invalid={error.password}
                   />
@@ -185,15 +197,6 @@ const Unlock = () => {
             </Button>
           </form>
         </div>
-      </div>
-      <div className="hidden lg:block lg:w-3/4 relative overflow-hidden m-2 rounded-md">
-        <Silk
-          speed={5}
-          scale={1}
-          color="#b96dfa"
-          noiseIntensity={1.5}
-          rotation={0.5}
-        />
       </div>
     </div>
   );
