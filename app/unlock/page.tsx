@@ -25,7 +25,8 @@ import {
   RectangleEllipsis,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
 
 const Unlock = () => {
   // using router for navigation
@@ -61,13 +62,46 @@ const Unlock = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [wrongPwd, setWrongPwd] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+
+    if (!file) return;
+
+    setWrongPwd(false);
+
+    if (!file.name.endsWith(".enc")) {
+      setError((prev) => ({
+        ...prev,
+        encFile: true,
+      }));
+      return;
+    }
+
+    setSelectedFile(file);
+
+    setError((prev) => ({
+      ...prev,
+      encFile: false,
+    }));
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      "application/octet-stream": [".enc"],
+    },
+  });
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
-    const file = formData.get("enc-file") as File;
+    // const file = formData.get("enc-file") as File;
+    const file = selectedFile;
     const password = formData.get("pwd") as string;
 
     const errors = {
@@ -77,10 +111,15 @@ const Unlock = () => {
 
     let hasError = false;
 
-    if (!file || file.size === 0) {
-      errors.encFile = true;
-      hasError = true;
-    } else if (!file.name.endsWith(".enc")) {
+    // if (!file || file.size === 0) {
+    //   errors.encFile = true;
+    //   hasError = true;
+    // } else if (!file.name.endsWith(".enc")) {
+    //   errors.encFile = true;
+    //   hasError = true;
+    // }
+
+    if(!file) {
       errors.encFile = true;
       hasError = true;
     }
@@ -94,8 +133,9 @@ const Unlock = () => {
 
     if (hasError) return;
 
+    const validFile = file!;
     try {
-      const fileContents = await file.text();
+      const fileContents = await validFile.text();
 
       //state update in react is async so it takes the old pwd and file contents and make the request
       // setPassword(password);
@@ -137,7 +177,7 @@ const Unlock = () => {
                 <FieldLabel htmlFor="enc-file" className="font-serif text-xl">
                   Encrypted File <span className="text-destructive">*</span>
                 </FieldLabel>
-                <InputGroup>
+                {/* <InputGroup>
                   <InputGroupInput
                     type="file"
                     accept=".enc"
@@ -147,7 +187,40 @@ const Unlock = () => {
                   <InputGroupAddon>
                     <File />
                   </InputGroupAddon>
-                </InputGroup>
+                </InputGroup> */}
+                <div
+                  {...getRootProps()}
+                  className={`border-2 border-dashed rounded-md p-6 transition-all duration-200 cursor-pointer 
+                    ${isDragActive ? "border-primary bg-primary/10" : "border-muted"}
+                    ${error.encFile ? "border-destructive" : ""}
+                  `}
+                >
+                  <input {...getInputProps()} name="enc-file" />
+
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <File className="size-8 text-muted-foreground" />
+
+                    {selectedFile ? (
+                      <>
+                        <p className="font-medium">{selectedFile.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Click or drop another file to replace
+                        </p>
+                      </>
+                    ) : isDragActive ? (
+                      <p>Drop your .enc file here...</p>
+                    ) : (
+                      <>
+                        <p className="font-medium">
+                          Drag & drop your vault file
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          or click to browse (.enc only)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
                 {error.encFile && (
                   <FieldError>
                     Encrypted file is required and should be of .enc file
