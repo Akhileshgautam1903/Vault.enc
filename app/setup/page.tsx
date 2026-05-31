@@ -20,7 +20,7 @@ import {
 import { AlertCircleIcon, Eye, EyeOff, RectangleEllipsis } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Silk from "@/components/Silk";
-import VaultLogo from "@/components/vault/VaultLogo";
+import VaultLogo from "@/components/VaultLogo";
 
 export default function page() {
   const { setMasterPassword } = useVault();

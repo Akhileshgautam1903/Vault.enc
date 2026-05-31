@@ -27,7 +27,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
-import VaultLogo from "@/components/vault/VaultLogo";
+import VaultLogo from "@/components/VaultLogo";
 
 const Vault = () => {
   const { entries, setEntries, masterPassword, setMasterPassword } = useVault();

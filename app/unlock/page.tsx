@@ -15,7 +15,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import VaultLogo from "@/components/vault/VaultLogo";
+import VaultLogo from "@/components/VaultLogo";
 import { useVault } from "@/lib/vaultContext";
 import {
   AlertCircleIcon,
@@ -190,15 +190,15 @@ const Unlock = () => {
                 </InputGroup> */}
                 <div
                   {...getRootProps()}
-                  className={`border-2 border-dashed rounded-md p-6 transition-all duration-200 cursor-pointer 
+                  className={`border-2 border-dashed rounded-md p-6 transition-all duration-200 cursor-pointer font-serif min-h-60 flex items-center justify-center
                     ${isDragActive ? "border-primary bg-primary/10" : "border-muted"}
                     ${error.encFile ? "border-destructive" : ""}
                   `}
                 >
                   <input {...getInputProps()} name="enc-file" />
 
-                  <div className="flex flex-col items-center gap-2 text-center">
-                    <File className="size-8 text-muted-foreground" />
+                  <div className="flex flex-col items-center justify-center gap-2 text-center">
+                    <File className="size-8 text-accent" />
 
                     {selectedFile ? (
                       <>
@@ -212,7 +212,7 @@ const Unlock = () => {
                     ) : (
                       <>
                         <p className="font-medium">
-                          Drag & drop your vault file
+                          Drag & drop your <span className="accent-text">vault</span> file
                         </p>
                         <p className="text-sm text-muted-foreground">
                           or click to browse (.enc only)
