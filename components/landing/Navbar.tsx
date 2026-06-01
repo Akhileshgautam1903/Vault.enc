@@ -7,7 +7,7 @@ type NavbarProps = {
 
 const Navbar = ({ showLinks = false }: NavbarProps) => {
   return (
-    <nav className="flex justify-between items-center pt-8 font-serif">
+    <nav className="flex justify-between items-center pt-6 font-serif">
       <h1 className="text-4xl font-serif">
         Vault<span className="accent-text">.enc</span>
       </h1>
