@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import Link from "next/link";
 
 const Hero = () => {
@@ -10,9 +11,9 @@ const Hero = () => {
           <span className="accent-text">system.</span>
         </h1>
         <p className="mb-4 text-base">
-          Every other password manager stores your data on their servers. 
-          We don't even have servers. 
-          Just you and an encrypted file on your machine.
+          Every other password manager stores your data on their servers. We
+          don't even have servers. Just you and an encrypted file on your
+          machine.
         </p>
         <div className="w-full flex gap-4 font-serif">
           <Button className="text-lg" asChild>
@@ -23,8 +24,14 @@ const Hero = () => {
           </Button>
         </div>
       </div>
-      <div className="w-full rounded-xl border border-zinc-800 bg-zinc-900 aspect-video flex items-center justify-center text-zinc-600">
-        Preview coming soon
+      <div className="relative w-full aspect-video rounded-xl border border-zinc-800 overflow-hidden">
+        <Image
+          src="/product_ss.png"
+          alt="Screenshot of the product"
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
     </section>
   );
