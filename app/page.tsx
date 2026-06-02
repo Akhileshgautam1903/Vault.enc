@@ -1,3 +1,4 @@
+import Features from "@/components/landing/Features";
 import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Navbar from "@/components/landing/Navbar";
@@ -9,6 +10,7 @@ export default function Home() {
       <main className="space-y-24 mt-8">
         <Hero />
         <HowItWorks />
+        <Features />
       </main>
     </div>
   );
