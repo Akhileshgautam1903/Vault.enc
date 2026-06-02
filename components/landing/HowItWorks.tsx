@@ -7,7 +7,7 @@ const HowItWorks = () => {
       <h2 className="text-5xl font-serif mb-6">
         How it <span className="accent-text">Works...</span>
       </h2>
-      <div className="flex flex-col lg:flex-row justify-between lg:items-stretch">
+      <div className="flex flex-col lg:flex-row justify-between lg:items-stretch h-50 gap-4">
         <StepCard
           number="01"
           title="Create your master password."
