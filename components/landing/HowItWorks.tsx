@@ -10,7 +10,11 @@ const HowItWorks = () => {
       <div className="flex flex-col lg:flex-row justify-between lg:items-stretch gap-4">
         <StepCard
           number="01"
-          title="Create your master password."
+          title={
+            <>
+              Create your master <span className="accent-text">password.</span>
+            </>
+          }
           description="One password to rule them all. Pick something strong — we'll never store it. Not even us."
         />
         <div className="flex items-center self-center">
@@ -19,7 +23,11 @@ const HowItWorks = () => {
         </div>
         <StepCard
           number="02"
-          title="Add your passwords."
+          title={
+            <>
+              Add your <span className="accent-text">passwords.</span>
+            </>
+          }
           description="Like writing in a secret diary, but this one doesn't fit under your mattress. Add as many as you need."
         />
         <div className="flex items-center self-center">
@@ -28,7 +36,11 @@ const HowItWorks = () => {
         </div>
         <StepCard
           number="03"
-          title="Lock and export."
+          title={
+            <>
+              Lock and <span className="accent-text">Export.</span>
+            </>
+          }
           description="One click. One encrypted file. Yours to keep, yours to carry. Even we don't get a copy."
         />
       </div>

@@ -1,6 +1,6 @@
 type StepCardProps = {
   number: string;
-  title: string;
+  title: React.ReactNode;
   description: string;
 };
 
