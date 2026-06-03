@@ -58,10 +58,10 @@ const Features = () => {
 
   return (
     <section>
-      <h2 className="text-5xl font-serif mb-4">
+      <h2 className="text-4xl font-serif mb-4">
         Key <span className="accent-text">Features</span>
       </h2>
-      <div className="py-6 grid lg:grid-cols-3 gap-4">
+      <div className="grid lg:grid-cols-3 gap-4">
         {features.map((feature, index) => (
           <div
             key={feature.key}
@@ -73,8 +73,8 @@ const Features = () => {
             <div
               className={`absolute -z-10 top-0 h-96 w-96 rounded-full bg-accent/50 blur-3xl ${
                 index === 1 || index === 2
-                  ? "-right-30 lg:-right-50"
-                  : "-right-30"
+                  ? "-right-50"
+                  : "-right-50 lg:-right-30"
               }`}
             />
             {feature.icon}

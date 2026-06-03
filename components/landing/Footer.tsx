@@ -3,7 +3,7 @@ import Link from "next/link";
 const Footer = () => {
   return (
     <footer className="py-8 text-center font-serif border-t border-t-accent relative">
-      <div className="flex justify-between px-12">
+      <div className="flex justify-between px-4 lg:px-12">
         <h3 className="text-2xl">
           Vault<span className="accent-text">.enc</span>
         </h3>
@@ -18,7 +18,7 @@ const Footer = () => {
           </svg>
         </Link>
       </div>
-      <p className="text-xl mt-8">
+      <p className=" lg:text-xl mt-8">
         Made with ❤️ by <span className="accent-text">Akhilesh</span>
       </p>
     </footer>

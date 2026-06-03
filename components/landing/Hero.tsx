@@ -6,7 +6,7 @@ const Hero = () => {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">
       <div>
-        <h1 className="text-4xl lg:text-7xl font-serif mb-6">
+        <h1 className="text-5xl lg:text-7xl font-serif mb-6">
           Your passwords never leave your{" "}
           <span className="accent-text">system.</span>
         </h1>

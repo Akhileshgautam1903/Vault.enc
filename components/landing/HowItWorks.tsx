@@ -4,7 +4,7 @@ import StepCard from "./StepCard";
 const HowItWorks = () => {
   return (
     <section>
-      <h2 className="text-5xl font-serif mb-6">
+      <h2 className="text-4xl font-serif mb-4">
         How it <span className="accent-text">Works...</span>
       </h2>
       <div className="flex flex-col lg:flex-row justify-between lg:items-stretch gap-4">
