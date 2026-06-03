@@ -71,7 +71,7 @@ const Features = () => {
             }
           >
             <div
-              className={`absolute -z-10 top-0 h-96 w-96 rounded-full bg-accent/30 blur-3xl ${
+              className={`absolute -z-10 top-0 h-96 w-96 rounded-full bg-accent/50 blur-3xl ${
                 index === 1 || index === 2
                   ? "-right-30 lg:-right-50"
                   : "-right-30"
