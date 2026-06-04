@@ -4,6 +4,7 @@ import Footer from "@/components/landing/Footer";
 import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Navbar from "@/components/landing/Navbar";
+import StatementBlock from "@/components/landing/StatementBlock";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       <Navbar showLinks={true} />
       <main className="space-y-24 mt-8">
         <Hero />
+        <StatementBlock/>
         <HowItWorks />
         <Features />
         <FAQ />
