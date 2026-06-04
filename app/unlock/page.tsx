@@ -71,7 +71,8 @@ const Unlock = () => {
 
     setWrongPwd(false);
 
-    if (!file.name.endsWith(".enc")) {
+    // In mobile the file saves as .enc.txt that's why there's a check for that too.
+    if (!file.name.endsWith(".enc") && !file.name.endsWith(".enc.txt")) { 
       setError((prev) => ({
         ...prev,
         encFile: true,
@@ -89,10 +90,7 @@ const Unlock = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    multiple: false,
-    accept: {
-      "application/octet-stream": [".enc"],
-    },
+    multiple: false
   });
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
@@ -105,7 +103,7 @@ const Unlock = () => {
     const password = formData.get("pwd") as string;
 
     const errors = {
-      encFile: false,
+      encFile: false, 
       password: false,
     };
 
