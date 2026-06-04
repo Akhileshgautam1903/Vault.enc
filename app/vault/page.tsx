@@ -163,9 +163,9 @@ const Vault = () => {
         </Button>
       </div>
 
-      {/* SEARCH & ADD BUTTON */}
-      <div className="flex mb-4 gap-2">
-        <VaultSearch value={searchText} onchange={setSearchText} />
+      {/* SEARCH */}
+      <VaultSearch value={searchText} onchange={setSearchText} />
+      {/* <div className="flex mb-4 gap-2">
         <Button
           variant="default"
           className="font-serif text-md"
@@ -174,27 +174,43 @@ const Vault = () => {
           <CirclePlus />
           Add Entry
         </Button>
-      </div>
+      </div> */}
 
       {/* ENTRY LIST */}
       {entries.length === 0 ? (
-        <div className="flex flex-col items-center justify-center border-muted border-dashed rounded-md border-2 min-h-[80vh] font-serif text-4xl px-5 gap-5">
+        <div className="flex flex-col items-center justify-center border-muted border-dashed rounded-md border-2 min-h-[70vh] lg:min-h-[80vh] font-serif text-4xl px-5 gap-5">
           <Ghost className="size-24 text-accent" />{" "}
-          <p>
+          <p className="text-center">
             Spooky is lonely... <br /> Add some{" "}
             <span className="accent-text">company</span>.
+            <Button
+              variant="default"
+              className="w-full font-serif text-xl!"
+              onClick={() => setShowAddModal(true)}
+            >
+              <CirclePlus />
+              Add Entry
+            </Button>
           </p>
         </div>
       ) : filteredEntries.length === 0 ? (
-        <div className="flex flex-col items-center justify-center border-muted border-dashed rounded-md border-2 min-h-[80vh] font-serif text-4xl px-5 gap-5">
+        <div className="flex flex-col items-center justify-center border-muted border-dashed rounded-md border-2 min-h-[70vh] lg:min-h-[80vh] font-serif text-4xl px-5 gap-5">
           <Telescope className="size-24 text-accent" />{" "}
-          <p>
+          <p className="text-center">
             Nothing in sight... <br /> try a different{" "}
             <span className="accent-text">search</span>.
+            <Button
+              variant="default"
+              className="w-full font-serif text-xl!"
+              onClick={() => setShowAddModal(true)}
+            >
+              <CirclePlus />
+              Add Entry
+            </Button>
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-20">
           {filteredEntries.map((entry) => (
             <VaultEntryCard
               key={entry.id}
@@ -210,6 +226,26 @@ const Vault = () => {
             />
           ))}
         </div>
+      )}
+
+      {entries.length > 0 && filteredEntries.length > 0 && (
+        <>
+          {/* background fade */}
+          <div className="fixed bottom-0 left-0 right-0 h-32 bg-linear-to-t from-background via-background/80 to-transparent pointer-events-none z-40" />
+          {/* Fixed add button for easy access */}
+          <div className="fixed bottom-4 left-0 right-0 px-4 z-50">
+            <div className="lg:max-w-xs mx-auto">
+              <Button
+                variant="default"
+                className="w-full font-serif text-md"
+                onClick={() => setShowAddModal(true)}
+              >
+                <CirclePlus />
+                Add Entry
+              </Button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* MODAL COMPONENTS */}
