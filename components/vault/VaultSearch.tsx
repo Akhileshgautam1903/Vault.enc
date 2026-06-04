@@ -12,7 +12,7 @@ type VaultSearchProps = {
 
 const VaultSearch = ({ value, onchange }: VaultSearchProps) => {
   return (
-    <InputGroup>
+    <InputGroup className="mb-4">
       <InputGroupInput
         className="font-serif text-lg!"
         placeholder="Search..."

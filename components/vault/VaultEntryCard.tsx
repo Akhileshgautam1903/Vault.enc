@@ -42,23 +42,22 @@ const VaultEntryCard = ({ entry, onEdit, onDelete }: VaultEntryProp) => {
   };
 
   return (
-    <Card size="sm">
+    <Card size="sm" className="group">
       <CardHeader className="flex items-center justify-between">
         <CardTitle>
-          <span className="font-serif text-xl">{entry.site}</span>
+          <span className="font-serif text-2xl">{entry.site}</span>
         </CardTitle>
 
-        <div className="flex gap-1">
-          <Button size="icon" variant="outline" onClick={() => onEdit(entry)}>
-            <Edit />
+        <div className="flex gap-1 lg:opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <Button variant="outline" onClick={() => onEdit(entry)}>
+            <Edit /> <span className="hidden lg:flex">Edit</span>
           </Button>
 
           <Button
-            size="icon"
             variant="destructive"
             onClick={() => onDelete(entry.id)}
           >
-            <Trash />
+            <Trash /> <span className="hidden lg:flex">Delete</span>
           </Button>
         </div>
       </CardHeader>
@@ -66,7 +65,7 @@ const VaultEntryCard = ({ entry, onEdit, onDelete }: VaultEntryProp) => {
       <CardContent>
         {/* Username */}
         <div className="flex items-center w-full justify-between">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 ">
             <User className="shrink-0 text-muted-foreground" size={16} />
 
             <p className="truncate">{entry.username}</p>
@@ -75,6 +74,7 @@ const VaultEntryCard = ({ entry, onEdit, onDelete }: VaultEntryProp) => {
           <Button
             variant="ghost"
             size="icon"
+            className="lg:opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             onClick={() => handleCopy(entry.username, "username")}
           >
             {copiedField === "username" ? <Check /> : <Copy />}
@@ -96,7 +96,7 @@ const VaultEntryCard = ({ entry, onEdit, onDelete }: VaultEntryProp) => {
             </p>
           </div>
 
-          <div>
+          <div className="lg:opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <Button
               variant="ghost"
               size="icon"
