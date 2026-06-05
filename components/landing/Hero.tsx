@@ -58,7 +58,7 @@ const Hero = () => {
     </section>
   );
 
-  return second_hero;
+  return first_hero;
 };
 
 export default Hero;
