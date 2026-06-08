@@ -3,7 +3,7 @@ import StepCard from "./StepCard";
 
 const HowItWorks = () => {
   return (
-    <section>
+    <section id="how-it-works">
       <h2 className="text-4xl font-serif mb-4">
         How it <span className="accent-text">Works...</span>
       </h2>

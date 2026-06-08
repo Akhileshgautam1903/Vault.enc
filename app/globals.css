@@ -127,6 +127,7 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
   .accent-text{
     @apply italic text-accent

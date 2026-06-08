@@ -91,7 +91,7 @@ const FAQ = () => {
   ];
 
   return (
-    <section>
+    <section id="faq">
       <h2 className="text-4xl font-serif">
         Frequently Asked <span className="accent-text">Questions.</span>
       </h2>

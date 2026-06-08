@@ -57,7 +57,7 @@ const Features = () => {
   ];
 
   return (
-    <section>
+    <section id="features">
       <h2 className="text-4xl font-serif mb-4">
         Key <span className="accent-text">Features</span>
       </h2>

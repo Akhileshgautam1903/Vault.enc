@@ -32,20 +32,20 @@ const Navbar = ({ showLinks = false }: NavbarProps) => {
             {/* Desktop links */}
             <div className="hidden lg:flex items-center gap-4 text-lg">
               <a
-                href=""
-                className="hover:text-accent transition-colors duration-150 ease-in-out"
+                href="#how-it-works"
+                className="hover:text-accent transition-all duration-150 ease-in-out hover:border-b border-b-accent"
               >
-                Security
+                How It Works
               </a>
               <a
-                href=""
-                className="hover:text-accent transition-colors duration-150 ease-in-out"
+                href="#features"
+                className="hover:text-accent transition-all duration-150 ease-in-out hover:border-b border-b-accent"
               >
-                How it works
+                Features
               </a>
               <a
-                href=""
-                className="hover:text-accent transition-colors duration-150 ease-in-out"
+                href="#faq"
+                className="hover:text-accent transition-all duration-150 ease-in-out hover:border-b border-b-accent"
               >
                 FAQs
               </a>
