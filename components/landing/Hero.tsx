@@ -42,10 +42,18 @@ const Hero = () => {
         Your passwords never leave your{" "}
         <span className="accent-text">system.</span>
       </h1>
-      <p className="mb-8 lg:mb-30 text-sm lg:text-base max-w-xl mx-auto">
+      <p className="mb-4 text-sm lg:text-base max-w-xl mx-auto">
         Every other password manager stores your data on their servers. We don't
         even have servers. Just you and an encrypted file on your machine.
       </p>
+      <div className="w-full flex gap-4 font-serif mb-8 lg:mb-30 justify-center">
+        <Button className="text-lg" asChild>
+          <Link href="/setup">Start Fresh</Link>
+        </Button>
+        <Button className="text-lg" variant="outline" asChild>
+          <Link href="/unlock">Unlock your vault</Link>
+        </Button>
+      </div>
       <div className="relative w-full aspect-video rounded-xl border border-zinc-800 overflow-hidden">
         <Image
           src="/product_ss.png"
@@ -58,7 +66,7 @@ const Hero = () => {
     </section>
   );
 
-  return first_hero;
+  return second_hero;
 };
 
 export default Hero;
